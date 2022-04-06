@@ -30,7 +30,7 @@ $ pod tag create
 $ pod tag spec-push REPO NAME.podspec
 ```
 
-## 视频
+## 演示gif
 
-<video src='./cocoapods-tag.mp4' width='100%' />
+<img src='./cocoapods-tag.gif' width='100%' />
 
