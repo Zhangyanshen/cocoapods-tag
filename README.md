@@ -49,5 +49,14 @@ $ gem install cocoapods-tag
 
 > 如有疑问，请使用`pod tag auto --help`查看帮助信息，里面有每个字段的解释
 
+## 版本号
 
+`CocoaPods`对版本号是有校验的，如果不符合规则当推送`podspec`到`spec repo`时会校验失败，具体校验正则如下：
+
+```ruby
+VERSION_PATTERN = '[0-9]+(?>\.[0-9a-zA-Z]+)*(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?'
+ANCHORED_VERSION_PATTERN = /\A\s*(#{VERSION_PATTERN})?\s*\z/
+```
+
+大概解释一下就是：以`数字0-9`开头，中间可以包含`数字0-9`、`字母a-z A-Z`，特殊字符只能包含`.`和`-`，版本号前后可以有`0个或多个空格`
 
