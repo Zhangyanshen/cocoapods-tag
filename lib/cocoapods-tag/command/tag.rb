@@ -1,5 +1,5 @@
 require 'cocoapods-tag/command/tag/auto'
-require 'cocoapods-tag/command/tag/create'
+# require 'cocoapods-tag/command/tag/create'
 require 'cocoapods-tag/command/tag/spec_push'
 
 module Pod
