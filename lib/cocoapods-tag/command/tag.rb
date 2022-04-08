@@ -1,3 +1,4 @@
+require 'cocoapods-tag/command/tag/auto'
 require 'cocoapods-tag/command/tag/create'
 require 'cocoapods-tag/command/tag/spec_push'
 
@@ -6,7 +7,7 @@ module Pod
     class Tag < Command
 
       self.abstract_command = true
-      self.default_subcommand = 'create'
+      self.default_subcommand = 'auto'
 
       self.summary = '🚀 方便地帮助 pod 库打 tag'
       self.description = <<-DESC

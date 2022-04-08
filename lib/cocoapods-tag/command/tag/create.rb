@@ -10,7 +10,7 @@ module Pod
         GIT_REPO = ".git".freeze
         PODSPEC_EXT = %w[podspec podspec.json].freeze
 
-        self.summary = '创建 tag 并 push 到远端仓库，同时可以上传 podspec 到 spec repo'
+        self.summary = '【问答的方式】创建 tag 并 push 到远端仓库，同时可以上传 podspec 到 spec repo'
 
         self.description = <<-DESC
         #{self.summary}
@@ -241,13 +241,13 @@ module Pod
             print "推送commit到远端git仓库`#{@remote}/#{current_branch}`失败:#{e}".red
           end
 
-          print "\n创建tag:#{@tag}并推送至远端：\n".yellow
+          print "\n创建tag:`#{@tag}`并推送至远端：\n".yellow
           begin
             `git tag -a #{@tag} -m #{@tag_msg}`
             `git push #{@remote} --tags`
           rescue Pod::StandardError => e
             @error = e
-            print "创建tag:#{@tag}并推送至远端失败:#{e}".red
+            print "创建tag:`#{@tag}`并推送至远端失败:#{e}".red
           end
         end
 
