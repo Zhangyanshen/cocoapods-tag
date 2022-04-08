@@ -23,16 +23,20 @@ module Pod
 
       # 欢迎语
       welcome_message
+      # 正则校验版本号
+      check_version
       # 检查本地是否有 spec_repo
       check_spec_repo if @spec_repo
       # 检查 git repo
       check_git_repo
       # 加载 podspec
       load_podspec
-      # 校验 podspec
-      lint_podspec
+      # 修改前校验 podspec
+      lint_podspec("\n修改前校验`#{podspec}`\n")
       # 修改 podspec
       modify_podspec
+      # 修改后校验 podspec
+      lint_podspec("\n修改后校验`#{podspec}`\n")
       # 推送 commit 到远端
       git_commit_push
       # 推送 tag 到远端
@@ -56,6 +60,19 @@ module Pod
 
     def done_message
       print "\n🌺 恭喜你完成任务 🌺\n".green
+    end
+
+    # 正则校验版本号
+    def check_version
+      unless Pod::Vendor::Gem::Version.correct?(@tag)
+        msg = <<-ERROR
+版本号格式不正确
+版本号必须以数字`0-9`开头，可以包含数字`0-9`、字母`a-z A-Z`，特殊字符只能是`.`和`-`
+具体请参考CocoaPods校验版本号的正则：
+#{Pod::Vendor::Gem::Version::ANCHORED_VERSION_PATTERN}
+        ERROR
+        raise Informative, msg
+      end
     end
 
     # 检查本地 spec_repo
