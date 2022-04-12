@@ -8,12 +8,14 @@ module Pod
     GIT_REPO = ".git".freeze
     PODSPEC_EXT = %w[podspec podspec.json].freeze
 
-    def initialize(tag, commit_msg, tag_msg, spec_repo = nil, quick = false)
+    def initialize(version, tag, commit_msg, tag_msg, spec_repo = nil, quick = false, remote_name = nil)
+      @version = version || raise(Informative, "缺少必填参数`version`")
       @tag = tag || raise(Informative, "缺少必填参数`tag`")
       @commit_msg = commit_msg || raise(Informative, "缺少必填参数`commit_msg`")
       @tag_msg = tag_msg || "v#{@tag}"
       @spec_repo = spec_repo
       @quick = quick
+      @remote = remote_name
     end
 
     public
@@ -64,9 +66,9 @@ module Pod
 
     # 正则校验版本号
     def check_version
-      unless Pod::Vendor::Gem::Version.correct?(@tag)
+      unless Pod::Vendor::Gem::Version.correct?(@version)
         msg = <<-ERROR
-版本号格式不正确
+版本号`#{@version}`格式不正确
 版本号必须以数字`0-9`开头，可以包含数字`0-9`、字母`a-z A-Z`，特殊字符只能是`.`和`-`
 具体请参考CocoaPods校验版本号的正则：
 #{Pod::Vendor::Gem::Version::ANCHORED_VERSION_PATTERN}
@@ -86,7 +88,7 @@ module Pod
 
     # 检查 git repo
     def check_git_repo
-      # print "检查本地git仓库：\n".yellow
+      print "检查本地git仓库\n".yellow
 
       # 本地是否有 .git 目录
       git_repo = File.join(Dir.pwd, GIT_REPO)
@@ -111,12 +113,12 @@ module Pod
 
         # 检查本地是否已经有该 tag
         print "\n检查本地仓库是否有tag:`#{@tag}`\n".yellow
-        raise Informative, "本地已经存在 tag:#{@tag}" if `git tag`.split("\n").include?(@tag)
+        raise Informative, "本地已经存在tag:#{@tag}" if `git tag`.split("\n").include?(@tag)
 
         # 判断远端是否已经有该 tag
         print "\n检查远端仓库是否有tag:`#{@tag}`\n".yellow
         tags = `git ls-remote --tags #{remote}`.split("\n").select { |tag| tag.include?("refs/tags/#{@tag}") }
-        raise Informative, "远端仓库已经有该 tag:#{@tag}" unless tags.empty?
+        raise Informative, "远端仓库已经有该tag:#{@tag}" unless tags.empty?
       end
 
     end
@@ -163,7 +165,7 @@ module Pod
         lines = []
         f.each_line do |line|
           if line =~ /(^\s*.+\.version\s*=\s*).*/
-            line = line.sub(/(^\s*.+\.version\s*=\s*).*/, "#{$1}'#{@tag}'")
+            line = line.sub(/(^\s*.+\.version\s*=\s*).*/, "#{$1}'#{@version}'")
           end
           if line =~ /(^\s*.+\.source\s*=\s*).*/
             line = line.sub(/(^\s*.+\.source\s*=\s*).*/, "#{$1}#{des_source}")
@@ -178,7 +180,7 @@ module Pod
 
     # 修改 *.podspec.json
     def modify_podspec_json(file)
-      @spec_hash['version'] = @tag
+      @spec_hash['version'] = @version
       @spec_hash['source'] = {
         'git'=> @spec_hash['source']['git'],
         'tag'=> "#{@tag}"

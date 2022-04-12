@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    cocoapods-tag (0.0.3)
+    cocoapods-tag (0.0.4)
       cocoapods
 
 GEM

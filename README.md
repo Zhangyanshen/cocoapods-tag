@@ -41,6 +41,26 @@ $ gem install cocoapods-tag
   $ pod tag 0.1.7 "修改podspec版本号为0.1.7" "版本0.1.7" --spec-repo=xxx --quick
   ```
 
+* 指定tag推送到的远端仓库（可以通过`git remote -v`查看）
+
+  ```shell
+  $ pod tag 0.1.7 "修改podspec版本号为0.1.7" "版本0.1.7" --remote=origin
+  ```
+  
+* 指定工作目录（插件执行的目录）
+
+  ```shell
+  $ pod tag 0.1.7 "修改podspec版本号为0.1.7" --work-dir=xxx
+  ```
+
+* 为tag添加前后缀**（前后缀与版本号中间会自动用`-`分隔，不需要手动添加）**
+
+  以下面这行命令为例，`podspec`中的`version`为`0.1.7`，`source`字段中的`tag`为`mtxx-0.1.7-beta1`，最终推送到远端仓库的`tag`也是`mtxx-0.1.7-beta1`
+
+  ```shell
+  $ pod tag 0.1.7 "修改podspec版本号为0.1.7" --prefix="mtxx" --suffix="beta1"
+  ```
+
 * 单独推送`podspec`到指定`spec repo`
 
   ```shell
@@ -60,3 +80,5 @@ ANCHORED_VERSION_PATTERN = /\A\s*(#{VERSION_PATTERN})?\s*\z/
 
 大概解释一下就是：以`数字0-9`开头，中间可以包含`数字0-9`、`字母a-z A-Z`，特殊字符只能包含`.`和`-`，版本号前后可以有`0个或多个空格`
 
+> 1. `cocoapods-tag`已经对版本号做了正则校验，不符合上面正则的版本号是无法通过的，这里写出来主要是为了提醒大家注意版本号的规范
+> 2. 不建议版本号前后加空格
