@@ -53,7 +53,7 @@ $ gem install cocoapods-tag
   $ pod tag 0.1.7 "修改podspec版本号为0.1.7" --work-dir=xxx
   ```
 
-* 为tag添加前后缀**（前后缀与版本号中间会自动用`-`分隔，不需要手动添加）**
+* 为tag添加前后缀 **（前后缀与版本号中间会自动用`-`分隔，不需要手动添加）**
 
   以下面这行命令为例，`podspec`中的`version`为`0.1.7`，`source`字段中的`tag`为`mtxx-0.1.7-beta1`，最终推送到远端仓库的`tag`也是`mtxx-0.1.7-beta1`
 
