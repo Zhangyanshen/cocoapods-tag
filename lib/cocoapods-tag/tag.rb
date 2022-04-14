@@ -97,6 +97,12 @@ module Pod
       # 是否与远端仓库关联
       raise Informative, "本地git仓库没有与远端仓库关联，请先使用`git remote add`关联远端仓库" if remote.nil?
 
+      # 是否处于 detached 状态
+      raise Informative, "当前处于detached状态，请先切到分支再进行操作" if current_branch == "HEAD"
+
+      # 是否有未提交的改动
+      raise Informative, "本地有未提交的改动，请先提交或暂存" unless `git status --porcelain`.split("\n").empty?
+
       unless @quick
         # 校验本地 git 是否与远端仓库同步
         print "\n检查本地git仓库是否与远端仓库同步\n".yellow
@@ -249,7 +255,7 @@ module Pod
     # 获取当前分支
     def current_branch
       @current_branch ||= begin
-                            `git branch`.split(' ')[1]
+                            `git rev-parse --abbrev-ref HEAD`.chomp
                           end
     end
 
