@@ -41,6 +41,7 @@ DESC
         def self.options
           [
             ['--quick', '跳过一些耗时校验，如：远端仓库是否已经有该tag'],
+            ['--skip-push-commit', '跳过推送commit到对应分支'],
             ['--remote=REMOTE', '指定tag推送到的远端仓库，可以通过`git remote -v`查看'],
             ['--spec-repo=SPECREPO', 'podspec推送到的repo，可以通过`pod repo list`查看'],
             ['--work-dir=WORKDIR', '执行命令的工作区'],
@@ -54,6 +55,7 @@ DESC
           @commit_msg = argv.shift_argument
           @tag_msg = argv.shift_argument
           @quick = argv.flag?('quick', false)
+          @skip_push_commit = argv.flag?('skip-push-commit', false)
           @remote = argv.option('remote', false)
           @spec_repo = argv.option('spec-repo', nil)
           @work_dir = argv.option('work-dir', nil)
@@ -75,7 +77,7 @@ DESC
             raise Informative, "不存在工作目录`#{@work_dir}`" unless File.exist?(@work_dir)
             Dir.chdir(@work_dir)
           end
-          tag = Pod::Tag.new(@version, @tag, @commit_msg, @tag_msg, @spec_repo, @quick, @remote)
+          tag = Pod::Tag.new(@version, @tag, @commit_msg, @tag_msg, @spec_repo, @quick, @remote, @skip_push_commit)
           tag.create
         end
 

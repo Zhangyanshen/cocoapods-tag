@@ -8,7 +8,7 @@ module Pod
     GIT_REPO = ".git".freeze
     PODSPEC_EXT = %w[podspec podspec.json].freeze
 
-    def initialize(version, tag, commit_msg, tag_msg, spec_repo = nil, quick = false, remote_name = nil)
+    def initialize(version, tag, commit_msg, tag_msg, spec_repo = nil, quick = false, remote_name = nil, skip_push_commit = false )
       @version = version || raise(Informative, "缺少必填参数`version`")
       @tag = tag || raise(Informative, "缺少必填参数`tag`")
       @commit_msg = commit_msg || raise(Informative, "缺少必填参数`commit_msg`")
@@ -16,6 +16,7 @@ module Pod
       @spec_repo = spec_repo
       @quick = quick
       @remote = remote_name
+      @skip_push_commit = skip_push_commit
     end
 
     public
@@ -100,31 +101,41 @@ module Pod
       # 是否处于 detached 状态
       raise Informative, "当前处于detached状态，请先切到分支再进行操作" if current_branch == "HEAD"
 
-      # 是否有未提交的改动
-      raise Informative, "本地有未提交的改动，请先提交或暂存" unless `git status --porcelain`.split("\n").empty?
+      # # 是否有未提交的改动
+      # raise Informative, "本地有未提交的改动，请先提交或暂存" unless `git status --porcelain`.split("\n").empty?
+
+      # 检查本地是否已经有该 tag
+      print "\n检查本地仓库是否有tag:`#{@tag}`\n".yellow
+      raise Informative, "本地仓库已经存在tag:#{@tag}" if `git tag`.split("\n").include?(@tag)
 
       unless @quick
-        # 校验本地 git 是否与远端仓库同步
-        print "\n检查本地git仓库是否与远端仓库同步\n".yellow
-        local_commit = `git rev-parse #{remote}/HEAD`.chomp
-        remote_commit = `git ls-remote --head #{remote} #{current_branch}`.split("\t")[0]
-        unless local_commit == remote_commit
-          msg = <<-MSG
-本地git仓库没有与远端仓库同步，请先执行以下操作：
-1.`git pull`或`git fetch + git rebase`拉取最新代码
-2.`git push`推送本地仓库commit
-          MSG
-          raise Informative, msg
-        end
-
-        # 检查本地是否已经有该 tag
-        print "\n检查本地仓库是否有tag:`#{@tag}`\n".yellow
-        raise Informative, "本地已经存在tag:#{@tag}" if `git tag`.split("\n").include?(@tag)
-
         # 判断远端是否已经有该 tag
         print "\n检查远端仓库是否有tag:`#{@tag}`\n".yellow
         tags = `git ls-remote --tags #{remote}`.split("\n").select { |tag| tag.include?("refs/tags/#{@tag}") }
-        raise Informative, "远端仓库已经有该tag:#{@tag}" unless tags.empty?
+        raise Informative, "远端仓库已经有tag:#{@tag}" unless tags.empty?
+
+        # 校验本地 git 是否与远端仓库同步
+        print "\n检查本地git仓库是否与远端仓库同步\n".yellow
+        `git fetch #{remote}`
+        remote_br = `git rev-parse --abbrev-ref #{current_branch}@{u}`
+        unless remote_br == ''
+          remote_commit_count = `git rev-list --right-only --count #{current_branch}...#{remote_br}`.chomp.to_i
+          local_commit_count = `git rev-list --left-only --count #{current_branch}...#{remote_br}`.chomp.to_i
+          # 本地落后远端
+          unless remote_commit_count == 0
+            msg = <<-MSG
+本地git仓库落后于远端仓库`#{remote_commit_count}`个提交
+请先执行`git pull`或`git fetch #{remote} + git rebase #{remote_br}`拉取最新代码
+            MSG
+            raise Informative, msg
+          end
+
+          # 本地有未 push 的 commit
+          unless local_commit_count == 0
+            msg = "本地git仓库有`#{local_commit_count}`个commit未提交，请先执行`git push`提交"
+            raise Informative, msg
+          end
+        end
       end
 
     end
@@ -202,7 +213,7 @@ module Pod
       begin
         `git add #{podspec}`
         `git commit -m "#{@commit_msg}"`
-        `git push #{remote} #{current_branch}`
+        `git push #{remote} #{current_branch}` unless @skip_push_commit
       rescue Pod::StandardError => e
         @error = e
         print "推送commit到远端git仓库`#{remote}/#{current_branch}`失败:#{e}".red
