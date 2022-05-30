@@ -1,6 +1,7 @@
 require 'cocoapods-tag/command/tag/auto'
 # require 'cocoapods-tag/command/tag/create'
 require 'cocoapods-tag/command/tag/spec_push'
+require 'cocoapods-tag/command/tag/repo_list'
 
 module Pod
   class Command

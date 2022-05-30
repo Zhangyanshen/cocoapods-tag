@@ -178,8 +178,8 @@ module Pod
     def modify_podspec_ruby(file)
       org_source = @spec_hash['source']
       des_source = "{ :git => '#{org_source['git']}', :tag => '#{@tag}' }"
+      lines = []
       File.open(file, 'r:utf-8') do |f|
-        lines = []
         f.each_line do |line|
           if line =~ /(^\s*.+\.version\s*=\s*).*/
             line = line.sub(/(^\s*.+\.version\s*=\s*).*/, "#{$1}'#{@version}'")
@@ -189,9 +189,9 @@ module Pod
           end
           lines << line
         end
-        File.open(file, 'w:utf-8') do |f|
-          f.write(lines.join(""))
-        end
+      end
+      File.open(file, 'w:utf-8') do |f|
+        f.write(lines.join(""))
       end
     end
 
