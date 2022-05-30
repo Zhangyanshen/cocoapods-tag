@@ -157,6 +157,10 @@ module Pod
       if source['git'] && source['git'].strip == ''
         raise Informative, "source中git字段不能为空"
       end
+      # git字段只能是ssh
+      if source['git'] && source['git'] =~ /^(http|https)/
+        raise Informative, "source中git字段不能是http或https，只能是ssh"
+      end
     end
 
     # 修改podspec
