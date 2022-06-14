@@ -29,7 +29,7 @@ module Pod
       # 正则校验版本号
       check_version
       # 检查本地是否有 spec_repo
-      check_spec_repo if @spec_repo
+      # check_spec_repo if @spec_repo
       # 检查 git repo
       check_git_repo
       # 加载 podspec
@@ -104,11 +104,11 @@ module Pod
       # # 是否有未提交的改动
       # raise Informative, "本地有未提交的改动，请先提交或暂存" unless `git status --porcelain`.split("\n").empty?
 
-      # 检查本地是否已经有该 tag
-      print "\n检查本地仓库是否有tag:`#{@tag}`\n".yellow
-      raise Informative, "本地仓库已经存在tag:#{@tag}" if `git tag`.split("\n").include?(@tag)
-
       unless @quick
+        # 检查本地是否已经有该 tag
+        print "\n检查本地仓库是否有tag:`#{@tag}`\n".yellow
+        raise Informative, "本地仓库已经存在tag:#{@tag}" if `git tag`.split("\n").include?(@tag)
+
         # 判断远端是否已经有该 tag
         print "\n检查远端仓库是否有tag:`#{@tag}`\n".yellow
         tags = `git ls-remote --tags #{remote}`.split("\n").select { |tag| tag.include?("refs/tags/#{@tag}") }
